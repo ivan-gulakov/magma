@@ -26,7 +26,7 @@ fi
 MAGMA=${MAGMA:-"$(cd "$(dirname "${BASH_SOURCE[0]}")/../../" >/dev/null 2>&1 \
     && pwd)"}
 export MAGMA
-WORKERS=${WORKERS:-(( $(nproc) - 2 ))}
+WORKERS=${WORKERS:-$(( $(nproc) - 2 ))}
 TMPFS_SIZE=${TMPFS_SIZE:-50g}
 export POLL=${POLL:-5}
 export TIMEOUT=${TIMEOUT:-1m}
