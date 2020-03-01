@@ -14,6 +14,7 @@
 #       (default: undefined)
 # + env TMPFS_SIZE: the size of the tmpfs mounted volume (default: 50g)
 # + env MAGMA: path to magma root (default: ../../)
+# + env LOGDIR: path to logs directory
 ##
 
 if [ -z $WORKDIR ] || [ -z $REPEAT ]; then
@@ -58,7 +59,8 @@ start_campaign()
 
     echo "Started $FUZZER/$TARGET/$PROGRAM/$ITERATION on CPU $AFFINITY"
     mkdir -p "$SHARED" && chmod 777 "$SHARED"
-    "$MAGMA/tools/captain/start.sh" &> ./logs/$FUZZER-$TARGET-$PROGRAM-$ITERATION-start.log
+
+    "$MAGMA"/tools/captain/start.sh
 
     AR="$WORKDIR/ar/$FUZZER/$TARGET/$PROGRAM"
     mkdir -p "$AR"
@@ -156,7 +158,14 @@ for FUZZER in "${fuzzers[@]}"; do
         # build the Docker image
         IMG_NAME="magma/$FUZZER/$TARGET"
         echo "Building $IMG_NAME"
-        "$MAGMA/tools/captain/build.sh" &> ./logs/$FUZZER-$TARGET-build.log
+
+	if [ -z $LOGSDIR ]; then 
+	    BUILD_LOGFILE="/dev/null"
+	else
+            BUILD_LOGFILE=""$LOGSDIR"/"$FUZZER"_"$TARGET"_build.log"
+	fi
+
+        "$MAGMA"/tools/captain/build.sh &> "$BUILD_LOGFILE"
 
         mapfile -t defaultprgs < <(yq r "$MAGMA/targets/$TARGET/config.yaml" \
             'programs[*]')
